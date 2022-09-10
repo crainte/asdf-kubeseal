@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for kubeseal.
 GH_REPO="https://github.com/bitnami-labs/sealed-secrets"
 TOOL_NAME="kubeseal"
 TOOL_TEST="kubeseal --version"
@@ -26,26 +25,27 @@ sort_versions() {
 
 list_github_tags() {
   git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+    grep -o 'refs/tags/v[0-9.]*' | cut -d/ -f3- |
+    sed 's/^v//' | sort_versions
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if kubeseal has other means of determining installable versions.
   list_github_tags
 }
 
 download_release() {
-  local version filename url
+  local version path new_url old_url os arch
   version="$1"
-  filename="$2"
+  path="$2"
+  os="$(uname | tr '[:upper:]' '[:lower:]')"
+  arch="$(uname -m | sed -e 's/x86_64/amd64/')"
 
-  # TODO: Adapt the release URL convention for kubeseal
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  new_url="$GH_REPO/releases/download/v${version}/${TOOL_NAME}-${version}-${os}-${arch}.tar.gz"
+  old_url="$GH_REPO/releases/download/v${version}/${TOOL_NAME}-${os}-${arch}"
 
   echo "* Downloading $TOOL_NAME release $version..."
-  curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+  curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}.tar.gz" "$new_url" || \
+  curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}" -C - "$old_url" || fail "Could not download ${TOOL_NAME} ${version}"
 }
 
 install_version() {
@@ -61,7 +61,6 @@ install_version() {
     mkdir -p "$install_path"
     cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
-    # TODO: Assert kubeseal executable exists.
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
