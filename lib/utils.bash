@@ -46,7 +46,7 @@ download_release() {
   success="yes"
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}.tar.gz" "$new_url" || success="no"
-  if [ "${success}" -eq "no" ]; then
+  if [ "${success}" == "no" ]; then
     echo "* Attempting legacy URL"
     curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}" -C - "$old_url" || fail "Could not download ${TOOL_NAME} ${version}"
   fi
