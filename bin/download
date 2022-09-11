@@ -15,16 +15,16 @@ release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$ASDF_INSTALL_VERSION.tar.gz"
 # Download tar.gz file to the download directory
 download_release "$ASDF_INSTALL_VERSION" "$ASDF_DOWNLOAD_PATH"
 
-if [ -f "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}-${ASDF_INSTALL_VERSION}" ] ; then
-    # Move legacy file into expected path
-    mv "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}-${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}"
+if [ -f "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}-${ASDF_INSTALL_VERSION}" ]; then
+  # Move legacy file into expected path
+  mv "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}-${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}"
 
-    # Add executable permissions
-    chmod +x "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}"
+  # Add executable permissions
+  chmod +x "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}"
 else
-    # Extract contents of tar.gz file into the download directory
-    tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
+  # Extract contents of tar.gz file into the download directory
+  tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" || fail "Could not extract $release_file"
 
-    # Remove the tar.gz file since we don't need to keep it
-    rm "$release_file"
+  # Remove the tar.gz file since we don't need to keep it
+  rm "$release_file"
 fi

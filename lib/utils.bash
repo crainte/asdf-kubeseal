@@ -34,7 +34,7 @@ list_all_versions() {
 }
 
 download_release() {
-  local version path new_url old_url os arch
+  local version path new_url old_url os arch success
   version="$1"
   path="$2"
   os="$(uname | tr '[:upper:]' '[:lower:]')"
@@ -43,11 +43,13 @@ download_release() {
   new_url="$GH_REPO/releases/download/v${version}/${TOOL_NAME}-${version}-${os}-${arch}.tar.gz"
   old_url="$GH_REPO/releases/download/v${version}/${TOOL_NAME}-${os}-${arch}"
 
+  success="yes"
   echo "* Downloading $TOOL_NAME release $version..."
-  curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}.tar.gz" "$new_url" || \
-  echo "* Attempting legacy URL" && \
-  curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}" -C - "$old_url" || \
-  fail "Could not download ${TOOL_NAME} ${version}"
+  curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}.tar.gz" "$new_url" || success="no"
+  if [ "${success}" -eq "no" ]; then
+    echo "* Attempting legacy URL"
+    curl "${curl_opts[@]}" -o "${path}/${TOOL_NAME}-${version}" -C - "$old_url" || fail "Could not download ${TOOL_NAME} ${version}"
+  fi
 }
 
 install_version() {
